@@ -76,9 +76,9 @@ use {{invokerPackage}}\ObjectSerializer;
      * @param int                  $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
         int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
@@ -711,7 +711,7 @@ use {{invokerPackage}}\ObjectSerializer;
         {{#queryParams}}
         // query params
         $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            ${{paramName}}{{#isEnumRef}}->value{{/isEnumRef}},
+            ${{paramName}}{{#isEnumRef}}?->value{{/isEnumRef}},
             '{{baseName}}', // param base name
             '{{#schema}}{{openApiType}}{{/schema}}', // openApiType
             '{{style}}', // style
@@ -759,13 +759,13 @@ use {{invokerPackage}}\ObjectSerializer;
                 $formParams['{{baseName}}'][] = $paramFile instanceof \Psr\Http\Message\StreamInterface
                     ? $paramFile
                     : \GuzzleHttp\Psr7\Utils::tryFopen(
-                        ObjectSerializer::toFormValue($paramFile),
+                        ObjectSerializer::toFormValue('{{baseName}}', $paramFile)['{{baseName}}'],
                         'rb'
                     );
             }
             {{/isFile}}
             {{^isFile}}
-            $formParams['{{baseName}}'] = ObjectSerializer::toFormValue(${{paramName}});
+            $formParams = array_merge($formParams, ObjectSerializer::toFormValue('{{baseName}}', ${{paramName}}));
             {{/isFile}}
         }
         {{/formParams}}
